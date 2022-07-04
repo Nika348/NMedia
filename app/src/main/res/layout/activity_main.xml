@@ -93,8 +93,8 @@
         android:id="@+id/likesAmount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/likes_amount"
         android:layout_marginStart="8dp"
+        android:text="@string/likes_amount"
         app:layout_constraintStart_toEndOf="@id/likes"
         app:layout_constraintTop_toTopOf="@id/likes"
         app:layout_constraintBottom_toBottomOf="@id/likes"/>
