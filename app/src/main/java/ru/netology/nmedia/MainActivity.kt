@@ -1,10 +1,9 @@
 package ru.netology.nmedia
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import ru.netology.nmedia.databinding.ActivityMainBinding
-import ru.netology.nmedia.dto.Post
-import androidx.activity.viewModels
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class MainActivity : AppCompatActivity() {
@@ -13,32 +12,29 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val viewModel by viewModels<PostViewModel>
+        val viewModel by viewModels<PostViewModel>()
         viewModel.data.observe(this){ post ->
             with(binding) {
                 author.text = post.author
                 published.text = post.published
                 content.text = post.content
 
-                likesAmount?.text = amountLi(post.likes)
-                shareAmount?.text = amountSh(post.share)
-                visabilityAmount?.text = amountVi(post.visability)
+                likesAmount.text = amountLi(post.likes)
+                shareAmount.text = amountSh(post.share)
+                visabilityAmount.text = amountVi(post.visability)
 
-                if (post.likedByMe) {
-                    likes?.setImageResource(R.drawable.ic_baseline_favorite_24)
+                val likeImage = if (post.likedByMe) {
+                    R.drawable.ic_baseline_favorite_24
+                } else {
+                    R.drawable.ic_baseline_favorite_border_24
                 }
-                likes?.setOnClickListener {
-                    post.likedByMe = !post.likedByMe
-                    likes.setImageResource(
-                        if (post.likedByMe) R.drawable.ic_baseline_favorite_24 else R.drawable.ic_baseline_favorite_border_24
-                    )
-                    if (post.likedByMe) post.likes++ else post.likes--
-                    likesAmount?.text = amountLi(post.likes)
-                }
+                likes.setImageResource(likeImage)
 
-                share?.setOnClickListener {
-                    post.share++
-                    shareAmount?.text = amountSh(post.share)
+                likes.setOnClickListener {
+                    viewModel.like()
+                }
+                share.setOnClickListener {
+                    viewModel.share()
                 }
             }
         }

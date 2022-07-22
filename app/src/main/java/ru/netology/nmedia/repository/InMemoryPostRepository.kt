@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import ru.netology.nmedia.dto.Post
 
-class InMemoryRostRepository : PostRepository {
+class InMemoryPostRepository : PostRepository {
 
     var post = Post(
         id = 1,
@@ -25,6 +25,10 @@ class InMemoryRostRepository : PostRepository {
             likedByMe = !post.likedByMe,
             likes = if(post.likedByMe) post.likes - 1 else post.likes + 1
         )
+        data.value = post
+    }
+    override fun share(){
+        post.share++
         data.value = post
     }
 }
