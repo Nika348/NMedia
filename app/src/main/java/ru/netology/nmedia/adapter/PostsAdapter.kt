@@ -3,6 +3,7 @@ package ru.netology.nmedia.adapter
 import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
@@ -13,15 +14,22 @@ import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostDiffCallback
 
-typealias OnLikeListener = (post: Post) -> Unit
-typealias OnShareListener = (post: Post) -> Unit
+interface OnInteractionListener {
+    fun onLike(post: Post) {}
+    fun onEdit(post: Post) {}
+    fun onRemove(post: Post) {}
+    fun onShare(post: Post) {}
+}
 
-class PostsAdapter(private val onLikeListener: OnLikeListener, private val onShareListener: OnShareListener) :
+class PostsAdapter(private val OnInteractionListener: OnInteractionListener) :
     ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(binding, onLikeListener, onShareListener)
+        return PostViewHolder(
+            binding = binding,
+            listener = OnInteractionListener
+        )
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -32,8 +40,7 @@ class PostsAdapter(private val onLikeListener: OnLikeListener, private val onSha
 
 class PostViewHolder(
     private val binding: CardPostBinding,
-    private val onLikeListener: OnLikeListener,
-    private val onShareListener: OnShareListener
+    private val listener: OnInteractionListener
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
         binding.apply {
@@ -46,16 +53,33 @@ class PostViewHolder(
             visabilityAmount?.text = amountVi(post.visability)
 
             likes.setImageResource(
-               if (post.likedByMe) R.drawable.ic_baseline_favorite_24 else R.drawable.ic_baseline_favorite_border_24
-           )
-            if (post.likedByMe) {
-                likes.setImageResource(R.drawable.ic_baseline_favorite_24)
-            }
-            likes.setOnClickListener{
-                onLikeListener(post)
+                if (post.likedByMe) R.drawable.ic_baseline_favorite_24 else R.drawable.ic_baseline_favorite_border_24
+            )
+            likes.setOnClickListener {
+                listener.onLike(post)
             }
             share.setOnClickListener {
-                onShareListener(post)
+                listener.onShare(post)
+            }
+            menu.setOnClickListener {
+                PopupMenu(it.context, it).apply {
+                    inflate(R.menu.post_menu)
+
+                    setOnMenuItemClickListener setOnMenuItemClickListener@{ menuItem ->
+                        when (menuItem.itemId) {
+                            R.id.remove -> {
+                                listener.onRemove(post)
+                                return@setOnMenuItemClickListener true
+                            }
+                            R.id.edit -> {
+                                listener.onEdit(post)
+                                return@setOnMenuItemClickListener true
+                            }
+                            else -> false
+                        }
+                    }
+                }.show()
+
             }
         }
     }

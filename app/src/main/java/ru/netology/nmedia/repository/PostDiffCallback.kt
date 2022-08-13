@@ -12,6 +12,5 @@ class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
         return oldItem == newItem
     }
 
-    // Обсудим позже
     override fun getChangePayload(oldItem: Post, newItem: Post): Any = Unit
 }
