@@ -48,16 +48,15 @@ class PostViewHolder(
             published.text = post.published
             content.text = post.content
 
-            likesAmount?.text = amountLi(post.likes)
-            shareAmount?.text = amountSh(post.share)
+            likes?.text = amountLi(post.likes)
+            share?.text = amountSh(post.share)
             visabilityAmount?.text = amountVi(post.visability)
+            likes.isChecked = post.likedByMe
 
-            likes.setImageResource(
-                if (post.likedByMe) R.drawable.ic_baseline_favorite_24 else R.drawable.ic_baseline_favorite_border_24
-            )
             likes.setOnClickListener {
                 listener.onLike(post)
             }
+
             share.setOnClickListener {
                 listener.onShare(post)
             }
