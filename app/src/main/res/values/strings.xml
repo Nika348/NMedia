@@ -7,10 +7,13 @@
     <string name="likes_amount" translatable="false">0</string>
     <string name="share_amount" translatable="false">0</string>
     <string name="visability_amount" translatable="false">50</string>
-    <string name="menu_edit" translatable="false">Edit</string> />
+    <string name="menu_edit" translatable="false">Edit</string>
+    />
     <string name="post_menu_remove" translatable="false">Remove</string>
     <string name="post_input_text" translatable="false">Post text</string>
     <string name="empty_post_error" translatable="false">Post is blank</string>
     <string name="edit_message" translatable="false">Edit massage</string>
+    <string name="chooser_share_post" translatable="false">share_post</string>
+    <string name="chooser_video_post" translatable="false">video_choose</string>
     />
 </resources>

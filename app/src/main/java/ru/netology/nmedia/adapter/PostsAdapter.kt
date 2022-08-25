@@ -4,6 +4,7 @@ import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
@@ -19,6 +20,7 @@ interface OnInteractionListener {
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
     fun onShare(post: Post) {}
+    fun onVideo(post: Post) {}
 }
 
 class PostsAdapter(private val OnInteractionListener: OnInteractionListener) :
@@ -52,6 +54,14 @@ class PostViewHolder(
             share?.text = amountSh(post.share)
             visabilityAmount?.text = amountVi(post.visability)
             likes.isChecked = post.likedByMe
+
+            video.setImageResource(R.drawable.video)
+            video.isVisible = !post.video.isNullOrBlank()
+            if (video.isVisible) {
+                video.setOnClickListener {
+                    listener.onVideo(post)
+                }
+            }
 
             likes.setOnClickListener {
                 listener.onLike(post)

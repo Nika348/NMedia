@@ -1,15 +1,15 @@
 package ru.netology.nmedia
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
+import androidx.activity.result.launch
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class MainActivity : AppCompatActivity() {
@@ -20,11 +20,28 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val viewModel by viewModels<PostViewModel>()
-        binding.group.visibility = View.GONE
+
+        val newPostLauncher = registerForActivityResult(NewPostActivityContract()){ text ->
+            text ?: return@registerForActivityResult
+            viewModel.editContent(text)
+            viewModel.save()
+        }
+
+        val newEditPostLauncher = registerForActivityResult(NewEditPostActivityContract()){ text ->
+            text ?: return@registerForActivityResult
+            viewModel.editContent(text)
+            viewModel.save()
+        }
+
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun onEdit(post: Post) {
+                Intent().apply {
+                    action = Intent.ACTION_EDIT
+                    putExtra(Intent.EXTRA_TEXT, post.content)
+                    type = "text/plain"
+                }
                 viewModel.edit(post)
-                binding.group.visibility = View.VISIBLE
+                newEditPostLauncher.launch(post.content)
             }
 
             override fun onLike(post: Post) {
@@ -32,53 +49,45 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onShare(post: Post) {
-                viewModel.share(post.id)
+                val intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, post.content)
+                    type = "text/plain"
+                }
+
+                val shareIntent =
+                    Intent.createChooser(intent, getString(R.string.chooser_share_post))
+                startActivity(shareIntent)
             }
 
             override fun onRemove(post: Post) {
                 viewModel.removeById(post.id)
             }
+
+            override fun onVideo(post: Post) {
+                val appIntent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("vnd.youtube:" + post.video)
+                )
+
+                val webIntent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("http://www.youtube.com/watch?v=" + post.video)
+                )
+                val videoIntent =
+                    Intent.createChooser(appIntent, getString(R.string.chooser_video_post))
+                startActivity(videoIntent)
+                }
+
         })
 
-        viewModel.edited.observe(this) { post ->
-            if (post.id == 0L) {
-                return@observe
-            }
-            binding.content.setText(post.content)
-            binding.content.requestFocus()
-        }
-
         binding.list.adapter = adapter
-
-        binding.save.setOnClickListener {
-            if (binding.content.text.isNullOrBlank()) {
-                Toast.makeText(it.context, getString(R.string.empty_post_error), Toast.LENGTH_SHORT)
-                    .show()
-                return@setOnClickListener
-            }
-
-            val text = binding.content.text.toString()
-
-            viewModel.editContent(text)
-            viewModel.save()
-
-            binding.content.clearFocus()
-            AndroidUtils.hidekeyboard(binding.content)
-            binding.content.setText("")
-            binding.group.visibility = View.GONE
-        }
-
-        binding.cancel.setOnClickListener {
-            with(binding.content) {
-                setText("")
-                clearFocus()
-                AndroidUtils.hidekeyboard(this)
-                binding.group.visibility = View.GONE
-            }
-        }
-
         viewModel.data.observe(this) { posts ->
             adapter.submitList(posts)
+        }
+
+        binding.create.setOnClickListener {
+            newPostLauncher.launch()
         }
     }
 }
